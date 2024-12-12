@@ -1,60 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-int lcm(int n , int m ){
-   n = (n>0)? n : -n;
-    m = (m>0)? m: -m;
-    int x = n , y = m ;
-    while (n!=m){
-        if (n > m){
-            n = n - m;
-        }
-        else {
-            m = m - n;
-            }
+#include <math.h>
+typedef struct{
+    int real;
+    int img;
+} Complex;
+Complex add_Complex (Complex a ,Complex b){
+    Complex total;
+    total.real = a.real + b.real;
+    total.img = a.img + b.img;
+    return total;
+}
+void print_Complex (Complex a){
+    printf("%d + %di\n",a.real,a.img);
+}
+Complex read_Complex(){
+    Complex a;
+    printf("enter real part of number: ");
+    scanf("%d",&a.real);
+    printf("enter imaginary part of number: ");
+    scanf("%d",&a.img);
+    printf("\t*******************************************\n");
+    return a;
+}
+int Compare_Complex(Complex a, Complex b){
+    float mag_a = pow((pow(a.img,2)+pow(a.real,2)),0.5), mag_b = pow((pow(b.img,2)+pow(b.real,2)),0.5) ;
+    if(mag_a == mag_b){
+        return 0;
+
     }
- n = (x*y)/n;
- return n ; 
+    else if (mag_a>mag_b){
+        return 1;
+    }
+    else if (mag_a<mag_b){
+        return -1;
+    }
 }
-typedef struct
-{
-int Num;
-int Denom;
-} FRAC;
-FRAC Divide_fractions(FRAC n , FRAC m){
-    FRAC result;
-    result.Num = n.Num * m.Denom;
-    result.Denom = n.Denom * m.Num;
-    return result;
-}
-FRAC Add_fractions(FRAC n , FRAC m){
-    FRAC result;
-    int commonDenom = lcm(n.Denom,m.Denom);
-    result.Num = ((commonDenom/n.Denom)*n.Num)+((commonDenom/m.Denom)*m.Num);
-    result.Denom = commonDenom;
-    return result;
-}
-FRAC Multiply_fractions (FRAC n , FRAC m)
-{
-FRAC ans;
-ans.Num= n.Num * m.Num;
-ans.Denom = n.Denom * m.Denom;
-return ans;
-}
-void main()
-{
-FRAC N1, N2,N , D , S;
-N1.Num=3;
-N1.Denom=4;
-N2.Num=1;
-N2.Denom=2;
-N=Multiply_fractions(N1,N2);
-D = Divide_fractions(N1,N2);
-S = Add_fractions(N1,N2);
-printf("result of addition N1 and N2= %d / %d \n", S.Num,
-S.Denom);
-printf("result of division N1 by N2= %d / %d \n", D.Num,
-D.Denom);
-printf("result of subtract N1 to N2= %d / %d", N.Num,
-N.Denom);
+
+int main(){
+    Complex a,b,c,d;
+    a = read_Complex();
+    b = read_Complex();
+    c = read_Complex();
+    printf("FIRST NUMBER = ");
+    print_Complex(a);
+    printf("\n");
+    printf("SECOND NUMBER = ");
+    print_Complex(b);
+    printf("\n");
+    printf("THIRD NUMBER = ");
+    print_Complex(c);
+    printf("\n");
+    d = add_Complex(a,b);
+    d = add_Complex(d,c);
+    printf("ADDITION OF COMPLEX = ");
+    print_Complex(d);
+    printf("\n");
+    int i ,x,y;
+    i = Compare_Complex(a,b);
+    x = Compare_Complex(b,c);
+    y = Compare_Complex(a,c);
+    if (i == 1 && y == 1){
+        printf("HIGHEST MAGNITITUDE = ");
+        print_Complex(a);
+        printf("\n");
+    }
+    else if(x == 1 && i == -1){
+        printf("HIGHEST MAGNITITUDE = ");
+        print_Complex(b);
+    printf("\n");
+    }
+    else if(y == -1 && x == -1){
+        printf("HIGHEST MAGNITITUDE = ");
+        print_Complex(c);
+    printf("\n");
+    }
+    else if(x == 0 && y == 0 && i ==0){
+        printf("All complex numbers are equal\n");
+    }
+
+
+    
 }
