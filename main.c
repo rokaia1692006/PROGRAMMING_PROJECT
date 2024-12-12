@@ -2,13 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 int lcm(int n , int m ){
-    int i = 1;
-    while (i <= n && i <= m) {
-        if (i % n == 0 && i % m == 0) {
-            return i;
+   n = (n>0)? n : -n;
+    m = (m>0)? m: -m;
+    int x = n , y = m ;
+    while (n!=m){
+        if (n > m){
+            n = n - m;
         }
-        i++;
-}}
+        else {
+            m = m - n;
+            }
+    }
+ n = (x*y)/n;
+ return n ; 
+}
 typedef struct
 {
 int Num;
