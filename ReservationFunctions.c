@@ -4,8 +4,10 @@
 #include "reservation.h"
 #include <time.h>
 #include <stdlib.h>
+//clear screen
+
 void clearScreen() {
-    printf("entered clear screen");
+    
     //check if windows
 #ifdef _WIN32
 //clear in windows
@@ -15,8 +17,9 @@ void clearScreen() {
     system("clear"); 
 #endif
 }
+//validate id
 int validateID(const char *id) {
-    
+    //check if id is 14 digita
     if (strlen(id) != 14) {
         return 0; 
     }
@@ -28,6 +31,7 @@ int validateID(const char *id) {
 
     return 1; 
 }
+//count number of words
 int countwords(char *c){
     int  i = 0, w = 0; 
     
@@ -45,12 +49,15 @@ int countwords(char *c){
     }
     return i;
 }
+//check if name is valide
 int validateName (char *name){
+    //only 2 words
     if (countwords(name) !=2){
         return 0;
     }
     int i = 0 ;
     while(name[i]!='\0'){
+        // no numbers or characters
         if(!isalpha(name[i]) && name[i]!=' '){
             return 0;
         }
@@ -113,21 +120,20 @@ int validateEmail(char *email){
             
         }
     }
-    //printf("%s",domain);
+    
     if(domain[strlen(domain)-1]=='\n'||domain[strlen(domain)-1]==' '){
         domain[strlen(domain) - 1] = '\0';
     }
     
-    //strncpy(domain,at+1,strlen(at + 1));
-    //printf("%s",domain);
+   
     for(int i = 0 ; i < sizeof(domains) / sizeof(domains[0]) ; i++){
-        //printf("%d\n",strcmp(domain,domains[i]));
+        
         if(strcmp(domain,domains[i]) == 0){
             free(domain);
             return 1;
 
         }
-        //printf("Comparing with supported domain: %s\n", domains[i]);
+     
     }
     printf("%s is not a supported Domain \n",domain);
     free (domain);
@@ -135,9 +141,9 @@ int validateEmail(char *email){
 
     
 }
+//validate phone number
 int validateMobile(char* mobileNumber){
     // remove last whitespace character 
-    //printf("%s\n",mobileNumber);
     if(mobileNumber[12]==' '||mobileNumber[12]=='\n'){
         mobileNumber[12] = '\0';
     }
@@ -171,15 +177,14 @@ int validateMobile(char* mobileNumber){
         return 1;
        }
     }
-    //printf("%s",firstdigits);
     return 0;
 }
+//validate date 
 int validateDate (char reserveDate[], date* destination){
     //remove whitespace character
     //search for location of white space character and remove it
     reserveDate[strcspn(reserveDate, "\n")] = '\0';
-    //printf("%s",reserveDate);
-    //printf("entered the function");
+    //check format
     if(strlen(reserveDate)!=10 || reserveDate[2]!='/'||reserveDate[5]!='/'){
         printf("DATE WRONG FORMAT (dd/mm/yyyy)\n");
         return 0;
@@ -193,25 +198,18 @@ int validateDate (char reserveDate[], date* destination){
         return 0;
     }
     int day = atoi(ptr);
-    //printf("day = %d\n",day);
-    //printf("pointer = %s\n",ptr);
-   
     ptr = strtok(NULL,"/");
     if(ptr == NULL){
         printf("Error in pointer");
         return 0;
     }
     int month = atoi(ptr);
-    //printf("month = %d\n",month);
-    //printf("pointer = %s\n",ptr);
     ptr = strtok(NULL,"/");
     if(ptr == NULL){
         printf("Error in pointer");
         return 0;
     }
     int year = atoi(ptr);
-    //printf("pointer = %s\n",ptr);
-    //printf("year = %d\n",year);
 
     //check if date is valid
     int leap = 0;
@@ -229,16 +227,14 @@ int validateDate (char reserveDate[], date* destination){
          printf("wrong month %d\n",month);
         return 0;
         }
-    //get time
+    //get time now
     time_t t = time(NULL);
 
     struct tm *now = localtime(&t);
     int currentDay = now->tm_mday;
     int currentMonth = now->tm_mon + 1;
     int currentYear = now->tm_year + 1900; // counts years after 1900
-    /* printf("current day = %d\n",currentDay);
-    printf("current month = %d\n",currentMonth);
-    printf("current year = %d\n",currentYear); */
+
     
     //check if date is in the future
     if(currentYear>year || (currentYear == year && currentMonth>month) || (currentYear == year && currentMonth == month && currentDay>day)){
@@ -261,15 +257,15 @@ return 1;
     
 
 }
+//check if room category is correct
 int validateRoomCategory(char category[]){
-    //printf("category = %s\n",category);
     category[strcspn(category, "\n")] = '\0';
 
     if(strchr(category,' ')!= NULL){
         printf("invalid category\n");
         return 0 ;
     }
-//printf("%s",category);
+
 
 for(int i = 0 ; i < 3;i++){
     if(strcmp(category,categories[i])==0){
@@ -279,6 +275,7 @@ for(int i = 0 ; i < 3;i++){
 printf("choose a correct category CASE SENSITIVE\n");
 return 0 ;
 }
+//number of lines in file
 int countlines(FILE* file){
     if (file == NULL) {
         printf("Could not open file\n");
@@ -297,6 +294,7 @@ int countlines(FILE* file){
         
 
 }
+//load room file
 void LoadRooms(FILE *file,Room *rooms){
         int i = 0 ;
         char line[100];
@@ -338,11 +336,11 @@ void LoadRooms(FILE *file,Room *rooms){
                 return ;
                 }
                 rooms[i].price = atoi(ptr);
-            //printf("%d %s %s %d\n",rooms[i].number,rooms[i].roomCategory,rooms[i].status,rooms[i].price);
             i++;
             }
             
 }
+//load reservation file into struct
 void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
         int i = 0 ;
         char line[200];
@@ -352,7 +350,6 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
             if(line == NULL){
                 continue;
             }
-            //printf("%s\n",line);
             char *ptr = strtok(line, ",");
             if(ptr == NULL){
                 printf("error in pointer-8");
@@ -360,18 +357,13 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
             } 
             strncpy(Reserve[i].ID,ptr,sizeof(Reserve[i].ID)-1) ;
             Reserve[i].ID[sizeof( Reserve[i].ID) - 1] = '\0';
-            //printf("%s ",Reserve[i].ID);
             //room number
             ptr = strtok(NULL, ",");
-            //printf("%s",ptr);
             if(ptr == NULL){
                 printf("error in pointer-7");
                 
                 }
-                
-                Reserve[i].roomNum=atoi(ptr) ;
-                //printf("%d ",Reserve[i].roomNum);
-            
+                Reserve[i].roomNum=atoi(ptr) ;            
             //status
             ptr = strtok(NULL, ",");
             if(ptr == NULL){
@@ -379,9 +371,7 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                 
                 }
                 strncpy(Reserve[i].status,ptr,sizeof(Reserve[i].status)-1) ;
-                Reserve[i].status[sizeof( Reserve[i].status) - 1] = '\0';
-                //printf("%s ",Reserve[i].status);
-            
+                Reserve[i].status[sizeof( Reserve[i].status) - 1] = '\0';            
             //name
             ptr = strtok(NULL, ",");
             if(ptr == NULL){
@@ -390,7 +380,6 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                 }
                 strncpy(Reserve[i].customerName,ptr,sizeof(Reserve[i].customerName)-1) ;
                  Reserve[i].customerName[sizeof( Reserve[i].customerName) - 1] = '\0';
-                //printf("%s ",Reserve[i].customerName);
             //national id
             ptr = strtok(NULL, ",");
             if(ptr == NULL){
@@ -399,7 +388,6 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                 }
                 strncpy(Reserve[i].nationalID,ptr,sizeof(Reserve[i].nationalID)-1) ;
                 Reserve[i].nationalID[sizeof( Reserve[i].nationalID) - 1] = '\0';
-                //printf("%s ",Reserve[i].nationalID);
                 //number of nights
                 ptr = strtok(NULL, ",");
                 if(ptr == NULL){
@@ -407,7 +395,6 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                    
                     }
                     Reserve[i].numberNights = atoi(ptr) ;
-                    //printf("%d ",Reserve[i].numberNights);
                
                 //check in date
                 ptr = strtok(NULL, ",");
@@ -417,27 +404,21 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                     }
                 char date[30];
                 strcpy(date,ptr);
-                //printf("%s",date);
                 ptr = strtok(NULL, ",");
                 if (ptr == NULL) {
                     printf("Error in pointer-1\n");
-                    //continue; 
                 }
                   strncpy(Reserve[i].email,ptr,sizeof(Reserve[i].email)-1) ;
                   Reserve[i].email[sizeof( Reserve[i].email) - 1] = '\0';
-                    //printf("%s ",Reserve[i].email);
+                    
                       
                     //phone number
                     ptr = strtok(NULL, "");
                     if(ptr == NULL){
                         printf("error in pointer0");
                         }
-                        //printf("%s\n",ptr);
-                       
                     strncpy(Reserve[i].phoneNum, ptr,sizeof(Reserve[i].phoneNum)-1) ;
                     Reserve[i].phoneNum[sizeof(Reserve[i].phoneNum) - 1] ='\0';
-    
-                       //printf("%s\n",Reserve[i].phoneNum); 
                 char *tok = strtok(date,"-");
                 
                 if(tok == NULL){
@@ -445,7 +426,6 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                    
                 } 
                 int day = atoi(tok);
-                //printf("%s",tok);
             
                 tok = strtok(NULL,"-");
                 if(tok == NULL){
@@ -453,73 +433,54 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                    
                 }
                 int month = atoi(tok);
-                //printf("month = %d\n",month);
-            
-                //printf("pointer = %s\n",ptr);
                 tok = strtok(NULL,"-");
                 if(tok == NULL){
                     printf("Error in pointer3");
                     
                 }
                 int year = atoi(tok); 
-                //printf("year = %d\n",year);
                 Reserve[i].checkIn.day = day;
                 Reserve[i].checkIn.month = month;
                 Reserve[i].checkIn.year = year;
-                //printf("%d  %d  %d ",Reserve[i].checkIn.day ,Reserve[i].checkIn.month,Reserve[i].checkIn.year);
-                
             
             i++; 
-            //printf("\n");
             
             }
-            //printf("DONE");
             
 } 
+// enter data and validate into struct
 void enterData(reservationInfo* i){
      
 
    printf("To reserve a room please enter your first and last name:(maximum 100 characters) ");
     fgets(i->customerName,sizeof(i->customerName),stdin);
     i->customerName[strcspn(i->customerName, "\n")] = '\0';
-   // printf("%s\n",i->customerName);
-//getchar();
     while(!validateName(i->customerName)){
         printf("Wrong input please enter your first and last name:(maximum 100 characters) ");
         fgets(i->customerName,99,stdin);
         i->customerName[strcspn(i->customerName, "\n")] = '\0';
-    
-    //getchar();
 } 
-//enter national id
-//printf("%s\n",i->customerName);
-//printf("\e[1;1H
-//getchar();
+
     printf("please Enter ur national ID: 14 digits");
     fgets(i->nationalID,15,stdin);
     i->nationalID[strcspn(i->nationalID, "\n")] = '\0';
     //wrong id
     while(!validateID(i->nationalID)){
-        //getchar();
+       
         printf("Wrong ID Please try again: 14 digits");
         fgets(i->nationalID,15,stdin);
         i->nationalID[strcspn(i->nationalID, "\n")] = '\0';
         
     }
     i->nationalID[14]='\0';
-    //printf("%s\n",i->nationalID);
-    //email
-    
     printf("please Enter your email: ");
     getchar();
     fgets(i->email,99,stdin);
     i->email[strcspn(i->email, "\n")] = '\0';
-    //i->email[strcspn(i->email, " ")] = '\0';
     while(!validateEmail(i->email)){
         printf("Wrong email Please try again:");
         fgets(i->email,99,stdin);
-         i->email[strcspn(i->email, "\n")] = '\0';
-         //i->email[strcspn(i->email, " ")] = '\0';
+        i->email[strcspn(i->email, "\n")] = '\0';
     }
     //
 
@@ -539,13 +500,10 @@ void enterData(reservationInfo* i){
     char reserveDate[11];
     getchar(); 
     fgets(reserveDate,sizeof(reserveDate),stdin);
-    //printf(reserveDate);
     while(!validateDate(reserveDate,&i->checkIn)){
-        //getchar();
         printf("Wrong date Please try again:");
         fgets(reserveDate,sizeof(reserveDate),stdin);
     } 
-    //getchar();
     printf("Enter Number of Nights: ");
     scanf("%d",&i->numberNights);
     while(i->numberNights <= 0){
@@ -561,19 +519,13 @@ void enterData(reservationInfo* i){
     fgets(i->RoomCategory,11,stdin);
     while (!validateRoomCategory(i->RoomCategory)){
         printf("Wrong room category Please try again: (SeaView,LakeView,GardenView) ");
-        //getchar();
+       
         fgets(i->RoomCategory,11,stdin);
 }
-fflush(stdin);
+getchar();
  
 }
-/* char customerName [100];
-    char nationalID[14];
-    char phoneNum[12];
-    char email[100];
-    date checkIn;
-    int numberNights;
-    char RoomCategory [10]; */
+//  print data to confirm
 void printReservation(reservationInfo* customer){
     printf("\n");
     clearScreen();
@@ -586,36 +538,31 @@ void printReservation(reservationInfo* customer){
     printf("Reservation Date = %d/%d/%d\n",customer->checkIn.day,customer->checkIn.month,customer->checkIn.year);
 
 }
-void showroom(Room* rooms , char* category,int count){
+//display rooms available in category
+int showroom(Room* rooms , char* category,int count){
     printf("\n");
     clearScreen(); 
-    //system("cls");AAAAAAAA
     int f = 0;
     printf("\t Available Rooms\n");
     for (int i = 0;i<count;i++){
-    //printf("INLOOP");
     if(strcmp(rooms[i].roomCategory,category)==0){
         if(strcmp(rooms[i].status,"Available")==0){
             printf("Room number = %d\tPrice =  %d\n",rooms[i].number,rooms[i].price);
             f = 1;}
 }  }
 int flag = 0;
-//getchar();
 while (f == 0){
     printf("No rooms available in that category please choose another\n");
-    
     printf("CASE SENSITIVE\n");
     printf("choose a Room category:(SeaView,LakeView,GardenView) ");
     getchar();
     fgets(category,11,stdin);
     while (!validateRoomCategory(category)){
         printf("Wrong room category Please try again: (SeaView,LakeView,GardenView) ");
-        //getchar();
         fgets(category,11,stdin);
 }
    printf("\t    Available Rooms\n");
     for (int i = 0;i<count;i++){
-    //printf("INLOOP");
     if(strcmp(rooms[i].roomCategory,category)==0){
          
         if(strcmp(rooms[i].status,"Available")==0){
@@ -623,33 +570,34 @@ while (f == 0){
             f = 1;}
             else{
             flag+=1;}
+            //if all choices go back to main
             if(flag == 3){
                 printf("NO ROOMS AVAILABLE \n");
-                exit(1);
+               return 0;
             }
 }  }
 }
 
 }
+// choose Room From the Available rooms
 int chooseRoom (int roomNum,Room* rooms,int count,reservationInfo* customer){
-    //printf("Entered choose room function");
+
     int flag = 0;
     for (int i = 0;i<count;i++){
         if(rooms[i].number == roomNum){
             strcpy(rooms[i].status,"Reserved");
             customer->roomNum = rooms[i].number ;
-            //printf("Room %d has been reserved\n",roomNum);
             flag = 1;
             }
-            //printf("found room");
             }
 
             return flag;
             
 
+
 }
+//save room in file
 void saveRooms(FILE* file,Room * rooms,int count){
-   // printf("Entered save rooms function");
     for (int i = 0;i<count;i++){
         fprintf(file,"%d %s %s %d",rooms[i].number,
         rooms[i].status,rooms[i].roomCategory,rooms[i].price);
@@ -657,7 +605,6 @@ void saveRooms(FILE* file,Room * rooms,int count){
         if(i!=count-1){
             fprintf(file,"\n");
         }}
-       // printf("entered data in file\n");
 }
 void randomID(const char randomcharacter[],char*str , int num){
     int lengthRC = 10; //size of array of random array
@@ -670,8 +617,9 @@ void randomID(const char randomcharacter[],char*str , int num){
         str[i] = randomcharacter[(rand()%lengthRC)];//gets a random character from the array
     }
 }
+//check if random id already exists
 int validaterandomID(char * str,int line,reservationInfo *all ){
-    //printf("entered validate id function");
+    
     int flag = 0;
     for (int i = 0;i<line;i++){
         if (strcmp(str,all[i].ID)==0){
@@ -682,42 +630,13 @@ int validaterandomID(char * str,int line,reservationInfo *all ){
     return flag;
 
 }
-//143256,1124,confirmed,Ahmed Mohamed,90022800157646,4,29-12-2024,Ahmed.khaled@gmail.com,01227653498
-void addCustomer(reservationInfo* customer,reservationInfo *all,int line){
-    printf("entered add customer function");
-    if (customer == NULL || all == NULL) {
-        printf("Invalid customer or reservation array\n");
-        return;
-    }
-    printf("%s\n",customer->ID);
-    strncpy(all[line].ID,customer->ID,sizeof(all[line].ID) - 1);
-    all[line].ID[sizeof(all[line].ID) - 1] = '\0'; 
-    printf("%s ",all[line]);
-    strncpy(all[line].customerName,customer->customerName,sizeof(all[line].customerName) - 1);
-    all[line].customerName[sizeof(all[line].customerName) - 1] = '\0';
-    
-    all[line].roomNum = customer->roomNum;
-     strncpy(all[line].status,"unconfirmed",sizeof(all[line].status) - 1);
-    all[line].status[sizeof(all[line].status) - 1] = '\0';
-    strncpy(all[line].nationalID,customer->nationalID,sizeof(all[line].nationalID) - 1);
-    all[line].nationalID[sizeof(all[line].nationalID) - 1] = '\0';
-    all[line].numberNights = customer->numberNights;
-    strncpy(all[line].email , customer->email,sizeof(all[line].email) - 1);
-    all[line].email[sizeof(all[line].email) - 1] = '\0';
-    strncpy(all[line].phoneNum , customer->phoneNum,sizeof(all[line].phoneNum) - 1);
-    all[line].phoneNum[sizeof(all[line].phoneNum) - 1] = '\0';
-
-
-}
+//load customer in file 
 void writeCustomer(FILE* file,reservationInfo*all){
-    //printf("WRITE FUNCTION");
  
-    //143256,1124,confirmed,Ahmed Mohamed,90022800157646,4,29-12-2024,Ahmed.khaled@gmail.com,01227653498
     fprintf(file,"%s,",all->ID);
     fprintf(file,"%d,",all->roomNum);
     fprintf(file,"%s,",all->status);
     fprintf(file,"%s,",all->customerName);
-    //printf("%s",all->nationalID);
     fprintf(file,"%s,",all->nationalID);
     fprintf(file,"%d,",all->numberNights);
     fprintf(file,"%d-%d-%d,",all->checkIn.day,all->checkIn.month,all->checkIn.year);
@@ -727,48 +646,53 @@ void writeCustomer(FILE* file,reservationInfo*all){
 
    
 }
-
+// main reservation function
 void reserve(reservationInfo* customer){
+//enter custumer data
+while(1){
 enterData(customer);
-int c = 0;
-while(c == 0){
-//printf("%s\n",customer->nationalID);
+//print the reservation data
 printReservation(customer);
-
+//check if data is correct
 printf("is the data correct if no u will be prompted to enter the data again \n");
 printf("y/n: ");
 char choice;
 scanf(" %c",&choice);
+// try again
 if(choice == 'n'){
     printf("Enter the data again:\n");
-    
-    enterData(customer);
+    continue;
 }
+//exit while
 else if (choice == 'y'){
     printf("GREAT!\n");
-    c = 1;
+    break;
 }
 else{
     printf("please choose y/n");
 }
 }
+//open room
 FILE *file = fopen("Room.txt", "r");
 
 if(file == NULL){
     printf("file not found");
     exit(1);
     }
-
+//count the lines in room
 int count  = countlines(file);
-//printf("%d",count);
+//allocate memory
 Room* rooms = malloc(count*sizeof(Room));
+//memory allocation failed
 if(rooms == NULL){
     printf("Memory not allocated\n");
     fclose(file);
-    exit(1);
+   return;
     }
+    //load into struct
 LoadRooms(file,rooms);
 fclose(file); 
+//open reservation
 file = fopen("Reservation.txt", "r"); 
 if(file == NULL){
     printf("file not found");
@@ -776,103 +700,85 @@ if(file == NULL){
     }
 
 
-//printf("CLOSED\n");
+//show rooms
 
 showroom(rooms,customer->RoomCategory,count);
-//printf("%d",count);
+
 int choice;
 printf("Enter number of the room of your choice: ");
 scanf(" %d",&choice);
+//check if choice is valid
 while(!chooseRoom(choice,rooms,count,customer)){
 
     printf("Invalid choice, please choose a valid room number \n");
     printf("Enter number of the room of your choice: ");
     scanf(" %d",&choice);
 }
-//printf("%d",customer->roomNum); 
+//write in file
 file = fopen("Room.txt", "w");
+//check if file is open
 if(file == NULL){
     printf("file not found");
     exit(1);
     }
-    //printf("opened");
+    // save rooms
     saveRooms(file,rooms,count);
-    //fprintf(file,EOF);
     fclose(file); 
+    //open reservation
 file = fopen("Reservation.txt","r");
 if(file == NULL){
     printf("file not found");
-    exit(1);
+    return;
 }
+//count lines
 int line = countlines(file);
+//allocate memory
 reservationInfo *all = malloc(line*sizeof(reservationInfo));
 LoadresRooms(file,all,line);
 fclose(file);
-
+//generate random id
 randomID(randomcharacter,customer->ID,7);
-//printf("hena???");
+//validate random id
 while(validaterandomID(customer->ID,line,all)){
     printf("ID already exist\n");
     randomID(randomcharacter,customer->ID,7);
 
 }
 free(all);
-//printf("%s national id",customer->nationalID);
 printf("Your Reservation ID is %s please remeber it for later use\n",customer->ID);
+//status is unconfirmed
 strncpy(customer->status,"unconfirmed",sizeof(customer->status));
+//end the string
 customer->status[sizeof(customer->status)-1] = '\0';
-
-//printf("%s\n",customer->ID);
-
-//printReservation(customer); 
-//add custumer in all
-//printf("WAAAAAAAAAH");
-//addCustomer(customer,all,line);
-
-/* customer->checkIn.day = 12;
-customer->checkIn.month = 12;
-customer->checkIn.year = 2025;
-strcpy(customer->customerName ,"AAA AAA");
-strcpy(customer->phoneNum ,"01234567890");
-customer->roomNum = 1;
-strcpy(customer->email ,"rok@gmail.com");
-strcpy(customer->RoomCategory,"SeaView");
-strcpy(customer->ID,"RANDOM");
-strcpy(customer->nationalID,"124556");
-strcpy(customer->status,"CONFIRMED MOOOT");
-customer->numberNights = 10; */
-//printf("%s national id",customer->nationalID);
+//append data
     file = fopen("Reservation.txt","a+");
     fseek(file,0,SEEK_END); // making sure
     if(file == NULL){
         printf("Could not open file\n");
         return;
         }
-        //printf("ENTERED FUNCTION");
-        
-        //fprintf(file,"%s","\n");
         if (ftell(file) != 0) { // Check if the file is not empty
         fprintf(file, "\n");
     } 
+    //write new costumer in file
 writeCustomer(file,customer);
-//free(all);
+
 free(rooms);
-//printf("%d",choice);
 }
+//search for room
 int findRoom(Room* rooms,int NUM,int count){
     int i;
     
     for(i=0;i<count;i++){
-        //printf("%d ",rooms[i].number);
-        //printf("%d\n",NUM);
         if(rooms[i].number == NUM){
-            //printf("Room found");
+            //return index
             return i;
         }
         }
         return -1;
 
 }
+// change data in reservation
 void changeReservation(){
 
     char idNum[8];
@@ -886,20 +792,22 @@ void changeReservation(){
 
     int i;
     int flag = 0;
+    // find the line where reservation exits
     for(i=0;i<lines;i++){
+        // compare id
         if(strcmp(all[i].ID,idNum)==0){
-            //printf("Reservation Name: %s\n",all[i].customerName);
             flag = 1;
             break;}
+            //compare room number
         else if(all[i].roomNum==atoi(idNum)){
-            //printf("Reservation Name: %s\n",all[i].customerName);
             flag = 1;
             break;}
     }
-    //printf("%d",i);
+    //doesn't exist
     if(flag == 0){
         printf("No reservation found\n");
     }
+    //found
     else{
         FILE* Rooms = fopen("Room.txt","r");
         
@@ -956,10 +864,10 @@ void changeReservation(){
         printf("2. Change Phone Number\n");
 
         
-        
+        //phone number
         while ((!x))
         {
-        //fflush(stdin);
+       
         printf("Current phone number: %s \n",all[i].phoneNum);
         printf("Do you want to change Reservation phone number: (y/n)");
         scanf(" %c",&confirm);
@@ -989,15 +897,13 @@ void changeReservation(){
         }
         }
         x = 0;
+
         //change email
         printf("3. Change Email\n");
-        
-        
         while(!x){
             printf("Current email: %s \n",all[i].email);
             printf("Do you want to change Reservation email: (y/n) ");
             scanf(" %c",&confirm);
-            //getchar();
         if(confirm == 'y'){
             getchar();
             printf("Enter new email: ");
@@ -1024,10 +930,11 @@ void changeReservation(){
 
         }
                 }
-                x = 0;
+            //room category
+            x = 0;
         printf("4. Change Room Category\n");
-        //printf("Room number = %d\n",all[i].roomNum);
         int roomnumber = all[i].roomNum;
+        //using room number find category
         int roomlocation = findRoom(rooms,roomnumber,count);
         if(roomlocation == -1){
             printf("room not found");
@@ -1058,8 +965,6 @@ void changeReservation(){
             strcpy(rooms[roomlocation].status , "Available");
             //show available rooms
             showroom(rooms,all[i].RoomCategory,count);
-            //printf("%d",count);
-            //getchar();
             int choice;
             printf("Enter number of the room of your choice: ");
             scanf(" %d",&choice);
@@ -1082,10 +987,8 @@ void changeReservation(){
                     x = 1;
                 }}
                 x = 0;
+                // number of lines
         printf("5. Change Number of Nights\n");
-       
-        
-
         while (!x){
             printf("Current number of nights :%d\n",all[i].numberNights);
              printf("Do you want to change Reservation number of nights: (y/n)");
@@ -1106,6 +1009,7 @@ void changeReservation(){
 
         }}
         x = 0;
+        //date
         printf("6. Change Date\n");
         
         while (!x)
@@ -1140,34 +1044,38 @@ void changeReservation(){
         }
         
 }
+//print reservation
         printf("New Details");
         printReservation(&all[i]);
 printf("is the data correct if no u will be prompted to enter the data again \n");
 printf("y/n: ");
 char finalconfirm;
 scanf(" %c",&finalconfirm);
+while(finalconfirm !='n'&&finalconfirm !='y'){
+    printf("Invalid choice\n");
+    printf("y/n: ");
+    scanf(" %c",&finalconfirm);
+}
 if(finalconfirm == 'n'){
     printf("Enter the data again:\n");
     getchar();
-    //continue;
+    continue;
 }
 else if (finalconfirm == 'y'){
     printf("GREAT!\n");
-    
-    //finalconfirm = 1;
-    break;}
-        
-        
+    break;
+    }
+     
         }
-        //printf("Saving in files");
       
-        
-    Rooms = fopen("Room.txt","w");
+        //save rooms 
+        Rooms = fopen("Room.txt","w");
          saveRooms(Rooms,rooms,count);
          fclose(Rooms);
          res = fopen("Reservation.txt","w");
          for(int z = 0;z<lines;z++){
-         writeCustomer(res,all);
+            //save customers
+         writeCustomer(res,&all[z]);
          if(z!=(lines-1)){
             fprintf(res,"\n");
          }}
