@@ -4,8 +4,8 @@
 #include "reservation.h"
 #include <time.h>
 #include <stdlib.h>
+#include "loadfunc.c"
 //clear screen
-
 void clearScreen() {
     
     //check if windows
@@ -65,7 +65,7 @@ int validateName (char *name){
     }
     return 1;
 }
-
+//chack if email is correct
 int validateEmail(char *email){
     //if email exists
     if(email == NULL){
@@ -109,6 +109,7 @@ int validateEmail(char *email){
         }
 
     //copy all characters after the @
+    //copy after pointer and allocate memory and give pointer to memory
     char* domain = strdup(at + 1);
     //printf("%s",domain);
     if (domain == NULL){
@@ -218,15 +219,16 @@ int validateDate (char reserveDate[], date* destination){
     if(year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)){
         leap = 1;
     }
+    else if(month>12 || month<1){
+         printf("wrong month %d\n",month);
+        return 0;
+        }
     else if( day>31 || day<1 ||(day>28 && month == 2 && leap == 1)||(day == 29 && month == 2 && leap == 0)){
         printf("wrong day %d\n",day);
         return 0;
      }
     
-    else if(month>12 || month<1){
-         printf("wrong month %d\n",month);
-        return 0;
-        }
+    
     //get time now
     time_t t = time(NULL);
 
@@ -234,6 +236,7 @@ int validateDate (char reserveDate[], date* destination){
     int currentDay = now->tm_mday;
     int currentMonth = now->tm_mon + 1;
     int currentYear = now->tm_year + 1900; // counts years after 1900
+    
 
     
     //check if date is in the future
@@ -274,6 +277,24 @@ for(int i = 0 ; i < 3;i++){
 }
 printf("choose a correct category CASE SENSITIVE\n");
 return 0 ;
+}
+//check if number of nights is correct
+int validateNightNum(char num[]){
+    num[strcspn(num, "\n")] = '\0';
+    if(strchr(num,' ')!= NULL){
+        printf("invalid number\n");
+        return 0 ;
+        }
+        int i = 0;
+        while(num[i]!='\0'){
+            if(!isdigit(num[i])){
+                printf("invalid number\n");
+                return 0 ;
+            }
+            i++;
+        }
+        return 1 ;
+
 }
 //number of lines in file
 int countlines(FILE* file){
@@ -341,9 +362,9 @@ void LoadRooms(FILE *file,Room *rooms){
             
 }
 //load reservation file into struct
-void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
+void LoadresRooms(FILE *file,reservation *r,int lines){
         int i = 0 ;
-        char line[200];
+        char *line = malloc(lines*(sizeof(reservation)-1));
         while (fgets(line, sizeof(line), file) != NULL && i<lines) {
             //ID
             line[strcspn(line, "\n")] = '\0';
@@ -355,46 +376,47 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                 printf("error in pointer-8");
                 
             } 
-            strncpy(Reserve[i].ID,ptr,sizeof(Reserve[i].ID)-1) ;
-            Reserve[i].ID[sizeof( Reserve[i].ID) - 1] = '\0';
+            strncpy(r[i].reservationID,ptr,sizeof(r[i].reservationID)-1) ;
+            r[i].reservationID[sizeof( r[i].reservationID) - 1] = '\0';
             //room number
             ptr = strtok(NULL, ",");
             if(ptr == NULL){
                 printf("error in pointer-7");
                 
                 }
-                Reserve[i].roomNum=atoi(ptr) ;            
+                r[i].roomNum=atoi(ptr) ;            
             //status
             ptr = strtok(NULL, ",");
             if(ptr == NULL){
                 printf("error in pointer-6");
                 
                 }
-                strncpy(Reserve[i].status,ptr,sizeof(Reserve[i].status)-1) ;
-                Reserve[i].status[sizeof( Reserve[i].status) - 1] = '\0';            
+                strncpy(r[i].reserveStatus,ptr,sizeof(r[i].reserveStatus)-1) ;
+                r[i].reserveStatus[sizeof( r[i].reserveStatus) - 1] = '\0';            
             //name
             ptr = strtok(NULL, ",");
             if(ptr == NULL){
                 printf("error in pointer-5");
                 
                 }
-                strncpy(Reserve[i].customerName,ptr,sizeof(Reserve[i].customerName)-1) ;
-                 Reserve[i].customerName[sizeof( Reserve[i].customerName) - 1] = '\0';
+                strncpy(r[i].custName,ptr,sizeof(r[i].custName)-1) ;
+                 r[i].custName[sizeof( r[i].custName) - 1] = '\0';
             //national id
             ptr = strtok(NULL, ",");
             if(ptr == NULL){
                 printf("error in pointer-4");
                 
                 }
-                strncpy(Reserve[i].nationalID,ptr,sizeof(Reserve[i].nationalID)-1) ;
-                Reserve[i].nationalID[sizeof( Reserve[i].nationalID) - 1] = '\0';
+                strncpy(r[i].nationalId,ptr,sizeof(r[i].nationalId)-1) ;
+                r[i].nationalId[sizeof( r[i].nationalId) - 1] = '\0';
                 //number of nights
                 ptr = strtok(NULL, ",");
                 if(ptr == NULL){
                     printf("error in pointer-3");
                    
                     }
-                    Reserve[i].numberNights = atoi(ptr) ;
+                    strncpy(r[i].nightNum ,ptr,sizeof(r[i].nightNum)-1) ;
+                    r[i].nightNum[sizeof( r[i].nightNum) - 1] = '\0';
                
                 //check in date
                 ptr = strtok(NULL, ",");
@@ -408,8 +430,8 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                 if (ptr == NULL) {
                     printf("Error in pointer-1\n");
                 }
-                  strncpy(Reserve[i].email,ptr,sizeof(Reserve[i].email)-1) ;
-                  Reserve[i].email[sizeof( Reserve[i].email) - 1] = '\0';
+                  strncpy(r[i].email,ptr,sizeof(r[i].email)-1) ;
+                  r[i].email[sizeof( r[i].email) - 1] = '\0';
                     
                       
                     //phone number
@@ -417,8 +439,8 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                     if(ptr == NULL){
                         printf("error in pointer0");
                         }
-                    strncpy(Reserve[i].phoneNum, ptr,sizeof(Reserve[i].phoneNum)-1) ;
-                    Reserve[i].phoneNum[sizeof(Reserve[i].phoneNum) - 1] ='\0';
+                    strncpy(r[i].mobileNum, ptr,sizeof(r[i].mobileNum)-1) ;
+                    r[i].mobileNum[sizeof(r[i].mobileNum) - 1] ='\0';
                 char *tok = strtok(date,"-");
                 
                 if(tok == NULL){
@@ -439,9 +461,9 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
                     
                 }
                 int year = atoi(tok); 
-                Reserve[i].checkIn.day = day;
-                Reserve[i].checkIn.month = month;
-                Reserve[i].checkIn.year = year;
+                r[i].checkIn.day = day;
+                r[i].checkIn.month = month;
+                r[i].checkIn.year = year;
             
             i++; 
             
@@ -449,30 +471,30 @@ void LoadresRooms(FILE *file,reservationInfo *Reserve,int lines){
             
 } 
 // enter data and validate into struct
-void enterData(reservationInfo* i){
+void enterData(reservation* i){
      
 
    printf("To reserve a room please enter your first and last name:(maximum 100 characters) ");
-    fgets(i->customerName,sizeof(i->customerName),stdin);
-    i->customerName[strcspn(i->customerName, "\n")] = '\0';
-    while(!validateName(i->customerName)){
+    fgets(i->custName,sizeof(i->custName),stdin);
+    i->custName[strcspn(i->custName, "\n")] = '\0';
+    while(!validateName(i->custName)){
         printf("Wrong input please enter your first and last name:(maximum 100 characters) ");
-        fgets(i->customerName,99,stdin);
-        i->customerName[strcspn(i->customerName, "\n")] = '\0';
+        fgets(i->custName,99,stdin);
+        i->custName[strcspn(i->custName, "\n")] = '\0';
 } 
 
     printf("please Enter ur national ID: 14 digits");
-    fgets(i->nationalID,15,stdin);
-    i->nationalID[strcspn(i->nationalID, "\n")] = '\0';
+    fgets(i->nationalId,15,stdin);
+    i->nationalId[strcspn(i->nationalId, "\n")] = '\0';
     //wrong id
-    while(!validateID(i->nationalID)){
+    while(!validateID(i->nationalId)){
        
         printf("Wrong ID Please try again: 14 digits");
-        fgets(i->nationalID,15,stdin);
-        i->nationalID[strcspn(i->nationalID, "\n")] = '\0';
+        fgets(i->nationalId,15,stdin);
+        i->nationalId[strcspn(i->nationalId, "\n")] = '\0';
         
     }
-    i->nationalID[14]='\0';
+    i->nationalId[14]='\0';
     printf("please Enter your email: ");
     getchar();
     fgets(i->email,99,stdin);
@@ -487,13 +509,13 @@ void enterData(reservationInfo* i){
    
     
      printf("please Enter your mobile number: ");
-    fgets(i->phoneNum,12,stdin);
-     i->phoneNum[strcspn(i->phoneNum, "\n")] = '\0';
-    while(!validateMobile(i->phoneNum)){
+    fgets(i->mobileNum,12,stdin);
+     i->mobileNum[strcspn(i->mobileNum, "\n")] = '\0';
+    while(!validateMobile(i->mobileNum)){
         //getchar();
         printf("Wrong mobile number Please try again:");
-        fgets(i->phoneNum,12,stdin);
-         i->phoneNum[strcspn(i->phoneNum, "\n")] = '\0';
+        fgets(i->mobileNum,12,stdin);
+         i->mobileNum[strcspn(i->mobileNum, "\n")] = '\0';
     }
     printf("Enter Date of Reservation: (dd/mm/yyyy) ");
     
@@ -505,11 +527,11 @@ void enterData(reservationInfo* i){
         fgets(reserveDate,sizeof(reserveDate),stdin);
     } 
     printf("Enter Number of Nights: ");
-    scanf("%d",&i->numberNights);
-    while(i->numberNights <= 0){
+    scanf(" %s",&i->nightNum);
+    while(!validateNightNum(i->nightNum)){
         printf("Wrong number of nights Please try again:");
-        getchar();
-        scanf("%d",&i->numberNights);
+        //getchar();
+        scanf(" %s",&i->nightNum);
         
 
     }
@@ -526,14 +548,14 @@ getchar();
  
 }
 //  print data to confirm
-void printReservation(reservationInfo* customer){
+void printReservation(reservation* customer){
     printf("\n");
-    clearScreen();
-    printf("Customer Name: %s\n",customer->customerName);
-    printf("National ID: %s\n",customer->nationalID);
+    //clearScreen();
+    printf("Customer Name: %s\n",customer->custName);
+    printf("National ID: %s\n",customer->nationalId);
     printf("Customer Email: %s\n",customer->email);
-    printf("Customer Phone Number: %s\n",customer->phoneNum);
-    printf("Number of Nights: %d\n",customer->numberNights);
+    printf("Customer Phone Number: %s\n",customer->mobileNum);
+    printf("Number of Nights: %s\n",customer->nightNum);
     printf("Room Category: %s\n",customer->RoomCategory);
     printf("Reservation Date = %d/%d/%d\n",customer->checkIn.day,customer->checkIn.month,customer->checkIn.year);
 
@@ -580,7 +602,7 @@ while (f == 0){
 
 }
 // choose Room From the Available rooms
-int chooseRoom (int roomNum,Room* rooms,int count,reservationInfo* customer){
+int chooseRoom (int roomNum,Room* rooms,int count,reservation* customer){
 
     int flag = 0;
     for (int i = 0;i<count;i++){
@@ -606,6 +628,7 @@ void saveRooms(FILE* file,Room * rooms,int count){
             fprintf(file,"\n");
         }}
 }
+//generate random id
 void randomID(const char randomcharacter[],char*str , int num){
     int lengthRC = 10; //size of array of random array
     //intial value to start with in the pseudorandom generator
@@ -618,11 +641,11 @@ void randomID(const char randomcharacter[],char*str , int num){
     }
 }
 //check if random id already exists
-int validaterandomID(char * str,int line,reservationInfo *all ){
+int validaterandomID(char * str,int line,reservation *all ){
     
     int flag = 0;
     for (int i = 0;i<line;i++){
-        if (strcmp(str,all[i].ID)==0){
+        if (strcmp(str,all[i].reservationID)==0){
             flag = 1;
             break;
         }
@@ -631,23 +654,24 @@ int validaterandomID(char * str,int line,reservationInfo *all ){
 
 }
 //load customer in file 
-void writeCustomer(FILE* file,reservationInfo*all){
+void writeCustomer(FILE* file,reservation*all){
  
-    fprintf(file,"%s,",all->ID);
+    fprintf(file,"%s,",all->reservationID);
     fprintf(file,"%d,",all->roomNum);
-    fprintf(file,"%s,",all->status);
-    fprintf(file,"%s,",all->customerName);
-    fprintf(file,"%s,",all->nationalID);
-    fprintf(file,"%d,",all->numberNights);
+    fprintf(file,"%s,",all->reserveStatus);
+    fprintf(file,"%s,",all->custName);
+    //printf("%s",all->nationalId);
+    fprintf(file,"%s,",all->nationalId);
+    fprintf(file,"%s,",all->nightNum);
     fprintf(file,"%d-%d-%d,",all->checkIn.day,all->checkIn.month,all->checkIn.year);
     fprintf(file,"%s,",all->email);
-    fprintf(file,"%s",all->phoneNum);
+    fprintf(file,"%s",all->mobileNum);
     
 
    
 }
 // main reservation function
-void reserve(reservationInfo* customer){
+void reserve(reservation* customer){
 //enter custumer data
 while(1){
 enterData(customer);
@@ -655,7 +679,7 @@ enterData(customer);
 printReservation(customer);
 //check if data is correct
 printf("is the data correct if no u will be prompted to enter the data again \n");
-printf("y/n: ");
+printf("yes/no/return to menu/exit program(y/n/m/e)");
 char choice;
 scanf(" %c",&choice);
 // try again
@@ -668,8 +692,14 @@ else if (choice == 'y'){
     printf("GREAT!\n");
     break;
 }
+if (choice == 'm'){
+    return;
+}
+if(choice == 'e'){
+    exit(1);
+}
 else{
-    printf("please choose y/n");
+    printf("please choose y/n/m/e");
 }
 }
 //open room
@@ -732,24 +762,25 @@ if(file == NULL){
 }
 //count lines
 int line = countlines(file);
-//allocate memory
-reservationInfo *all = malloc(line*sizeof(reservationInfo));
-LoadresRooms(file,all,line);
 fclose(file);
+//allocate memory
+reservation *all = malloc(line*sizeof(reservation));
+load(all);
+
 //generate random id
-randomID(randomcharacter,customer->ID,7);
+randomID(randomcharacter,customer->reservationID,7);
 //validate random id
-while(validaterandomID(customer->ID,line,all)){
+while(validaterandomID(customer->reservationID,line,all)){
     printf("ID already exist\n");
-    randomID(randomcharacter,customer->ID,7);
+    randomID(randomcharacter,customer->reservationID,7);
 
 }
 free(all);
-printf("Your Reservation ID is %s please remeber it for later use\n",customer->ID);
+printf("Your Reservation ID is %s please remeber it for later use\n",customer->reservationID);
 //status is unconfirmed
-strncpy(customer->status,"unconfirmed",sizeof(customer->status));
+strncpy(customer->reserveStatus,"unconfirmed",sizeof(customer->reserveStatus));
 //end the string
-customer->status[sizeof(customer->status)-1] = '\0';
+customer->reserveStatus[sizeof(customer->reserveStatus)-1] = '\0';
 //append data
     file = fopen("Reservation.txt","a+");
     fseek(file,0,SEEK_END); // making sure
@@ -786,16 +817,17 @@ void changeReservation(){
     scanf("%s",idNum);
     FILE *res = fopen("Reservation.txt","r"); //reservation
     int lines = countlines(res); //lines in reservation
-    reservationInfo *all = malloc(lines*sizeof(reservationInfo)); //all people
-    LoadresRooms(res,all,lines);
     fclose(res);
+    reservation *all = malloc(lines*sizeof(reservation)); //all people
+    load(all);
+    
 
     int i;
     int flag = 0;
     // find the line where reservation exits
     for(i=0;i<lines;i++){
         // compare id
-        if(strcmp(all[i].ID,idNum)==0){
+        if(strcmp(all[i].reservationID,idNum)==0){
             flag = 1;
             break;}
             //compare room number
@@ -828,28 +860,28 @@ void changeReservation(){
         printf("1. Change Name\n");
         
         while(!x){     
-            printf("Current Name: %s\n",all[i].customerName);
-            printf("Do you want to change Reservation name: (y/n)");  
+            printf("Current Name: %s\n",all[i].custName);
+            printf("Do you want to change Reservation name: \nyes/no/return to menu/exit program(y/n/m/e)");  
             scanf(" %c",&confirm);
         if(confirm == 'y'){
             printf("Enter new name: ");
             getchar();
-            fgets(all[i].customerName,99,stdin);
-            all[i].customerName[strcspn(all[i].customerName, "\n")] = '\0';
-            while (!validateName(all[i].customerName))
+            fgets(all[i].custName,99,stdin);
+            all[i].custName[strcspn(all[i].custName, "\n")] = '\0';
+            while (!validateName(all[i].custName))
             {
                 printf("Invalid name. Please enter a valid name.\n");
                 printf("Enter new name: ");
                 getchar();
-                fgets(all[i].customerName,99,stdin);
-                all[i].customerName[strcspn(all[i].customerName, "\n")] = '\0';
+                fgets(all[i].custName,99,stdin);
+                all[i].custName[strcspn(all[i].custName, "\n")] = '\0';
 
 
                         }
             
             x =1;
         }
-        else if (confirm !='y' && confirm!='n'){
+        else if (confirm !='y' && confirm!='n'&&confirm!='m'&&confirm!='e'){
             printf("Invalid choice\n");
              x = 0;
                 continue;
@@ -857,6 +889,13 @@ void changeReservation(){
         else if(confirm == 'n'){
             x = 1;
 
+        }
+        else if(confirm == 'm'){
+            
+            return;
+        }
+        else if(confirm == 'e'){
+            exit(1);
         }}
         //change phone
         
@@ -868,25 +907,25 @@ void changeReservation(){
         while ((!x))
         {
        
-        printf("Current phone number: %s \n",all[i].phoneNum);
-        printf("Do you want to change Reservation phone number: (y/n)");
+        printf("Current phone number: %s \n",all[i].mobileNum);
+        printf("Do you want to change Reservation phone number: \nyes/no/return to menu/exit program(y/n/m/e)");
         scanf(" %c",&confirm);
         getchar();
         if(confirm == 'y'){
             printf("Enter new phone number: ");
-            fgets(all[i].phoneNum,12,stdin);
-            all[i].phoneNum[strcspn(all[i].phoneNum, "\n")] ='\0';
-            while (!validateMobile(all[i].phoneNum)){
+            fgets(all[i].mobileNum,12,stdin);
+            all[i].mobileNum[strcspn(all[i].mobileNum, "\n")] ='\0';
+            while (!validateMobile(all[i].mobileNum)){
                 printf("Invalid phone number. Please enter a valid phone number.\n");
                 printf("Enter new phone number: ");
-                fgets(all[i].phoneNum,12,stdin);
-                all[i].phoneNum[strcspn(all[i].phoneNum, "\n")] ='\0';
+                fgets(all[i].mobileNum,12,stdin);
+                all[i].mobileNum[strcspn(all[i].mobileNum, "\n")] ='\0';
                 
 
             }
             x =1;
             }
-            else if (confirm !='y' && confirm!='n'){
+            else if (confirm !='y' && confirm!='n'&&confirm!='m'&&confirm!='e'){
                 printf("Invalid choice\n");
                 x = 0;
                 continue;
@@ -895,6 +934,13 @@ void changeReservation(){
             x = 1;
 
         }
+        else if(confirm == 'm'){
+            
+            return;
+        }
+        else if(confirm == 'e'){
+            exit(1);
+        }
         }
         x = 0;
 
@@ -902,7 +948,7 @@ void changeReservation(){
         printf("3. Change Email\n");
         while(!x){
             printf("Current email: %s \n",all[i].email);
-            printf("Do you want to change Reservation email: (y/n) ");
+            printf("Do you want to change Reservation email: \nyes/no/return to menu/exit program(y/n/m/e) ");
             scanf(" %c",&confirm);
         if(confirm == 'y'){
             getchar();
@@ -920,7 +966,7 @@ void changeReservation(){
 
             x =1;
             }
-             else if (confirm !='y' && confirm!='n'){
+             else if (confirm !='y' && confirm!='n'&&confirm!='m'&&confirm!='e'){
                 printf("Invalid choice\n");
                 x = 0;
                 continue;
@@ -928,6 +974,13 @@ void changeReservation(){
                 else if(confirm == 'n'){
             x = 1;
 
+        }
+        else if(confirm == 'm'){
+            
+            return;
+        }
+        else if(confirm == 'e'){
+            exit(1);
         }
                 }
             //room category
@@ -945,7 +998,7 @@ void changeReservation(){
         
         while(!x){
             printf("Current room category: %s \n",rooms[roomlocation].roomCategory);
-        printf("Do you want to change Reservation room category: (y/n)");
+        printf("Do you want to change Reservation room category: \nyes/no/return to menu/exit program(y/n/m/e)");
         scanf(" %c",&confirm);
         if(confirm == 'y'){
             printf("CASE SENSITIVE\n");
@@ -978,28 +1031,40 @@ void changeReservation(){
             
             x = 1;
             }
-             else if (confirm !='y' && confirm!='n'){
+             else if (confirm !='y' && confirm!='n'&&confirm!='m'&&confirm!='e'){
                 printf("Invalid choice\n");
                 x = 0;
                 continue;
                 }
                 else if (confirm == 'n'){
                     x = 1;
-                }}
+                }
+                else if(confirm == 'm'){
+            
+            return;
+        }
+        else if(confirm == 'e'){
+            exit(1);
+        }}
                 x = 0;
                 // number of lines
         printf("5. Change Number of Nights\n");
         while (!x){
-            printf("Current number of nights :%d\n",all[i].numberNights);
-             printf("Do you want to change Reservation number of nights: (y/n)");
+            printf("Current number of nights :%s\n",all[i].nightNum);
+             printf("Do you want to change Reservation number of nights: \nyes/no/return to menu/exit program(y/n/m/e)");
         scanf(" %c",&confirm);
         if(confirm == 'y'){
             
             printf("Enter new number of nights: ");
            
-            scanf("%d",&all[i].numberNights);
+            scanf(" %s",&all[i].nightNum);
+            while(!validateNightNum(all[i].nightNum)){
+                printf("Invalid number of nights\n");
+                printf("Enter new number of nights: ");
+                scanf(" %s",&all[i].nightNum);
+            }
             x = 1;}
-            else if (confirm !='y' && confirm!='n'){
+            else if (confirm !='y' && confirm!='n'&&confirm!='m'&&confirm!='e'){
                 printf("Invalid choice\n");
                 x = 0;
                 continue;
@@ -1007,7 +1072,15 @@ void changeReservation(){
                 else if(confirm == 'n'){
             x = 1;
 
-        }}
+        }
+        else if(confirm == 'm'){
+            
+            return;
+        }
+        else if(confirm == 'e'){
+            exit(1);
+        }
+        }
         x = 0;
         //date
         printf("6. Change Date\n");
@@ -1015,7 +1088,7 @@ void changeReservation(){
         while (!x)
         {
             printf("Current Date = %d/%d/%d\n",all[i].checkIn.day,all[i].checkIn.month,all[i].checkIn.year);
-        printf("Do you want to change Reservation date: (y/n)");
+        printf("Do you want to change Reservation date: \nyes/no/return to menu/exit program(y/n/m/e)");
             scanf(" %c",&confirm);
             if(confirm == 'y'){
                 printf("Enter new date: (dd/mm/yyyy)");
@@ -1033,7 +1106,7 @@ void changeReservation(){
                 }
                 x =1;
                 }
-                else if (confirm !='y' && confirm!='n'){
+                else if (confirm !='y' && confirm!='n'&&confirm!='m'&&confirm!='e'){
                     printf("Invalid choice\n");
                     x = 0;
                 continue;
@@ -1041,6 +1114,13 @@ void changeReservation(){
                     else if(confirm == 'n'){
             x = 1;
 
+        }
+        else if(confirm == 'm'){
+            
+            return;
+        }
+        else if(confirm == 'e'){
+            exit(1);
         }
         
 }
@@ -1051,7 +1131,7 @@ printf("is the data correct if no u will be prompted to enter the data again \n"
 printf("y/n: ");
 char finalconfirm;
 scanf(" %c",&finalconfirm);
-while(finalconfirm !='n'&&finalconfirm !='y'){
+while(finalconfirm !='n'&&finalconfirm !='y'&&finalconfirm !='m'&&finalconfirm !='e'){
     printf("Invalid choice\n");
     printf("y/n: ");
     scanf(" %c",&finalconfirm);
@@ -1060,6 +1140,12 @@ if(finalconfirm == 'n'){
     printf("Enter the data again:\n");
     getchar();
     continue;
+}
+if(finalconfirm == 'm'){
+   return;
+}
+if(finalconfirm == 'e'){
+    exit(1);
 }
 else if (finalconfirm == 'y'){
     printf("GREAT!\n");
@@ -1082,4 +1168,191 @@ else if (finalconfirm == 'y'){
 
          fclose(res);
     }
+}
+//validate search by date
+int validateSearchDate (char reserveDate[], date* destination){
+    //remove whitespace character
+    //search for location of white space character and remove it
+    reserveDate[strcspn(reserveDate, "\n")] = '\0';
+    //check format
+    if(strlen(reserveDate)!=10 || reserveDate[2]!='/'||reserveDate[5]!='/'){
+        printf("DATE WRONG FORMAT (dd/mm/yyyy)\n");
+        return 0;
+    }
+   
+    //devide date into partition (day,month,year)
+    
+    char *ptr = strtok(reserveDate,"/");
+     if(ptr == NULL){
+        printf("Error in pointer");
+        return 0;
+    }
+    int day = atoi(ptr);
+    ptr = strtok(NULL,"/");
+    if(ptr == NULL){
+        printf("Error in pointer");
+        return 0;
+    }
+    int month = atoi(ptr);
+     if(month>12 || month<1){
+         printf("wrong month %d\n",month);
+        return 0;
+        }
+    ptr = strtok(NULL,"/");
+    if(ptr == NULL){
+        printf("Error in pointer");
+        return 0;
+    }
+    int year = atoi(ptr);
+
+    //check if date is valid
+    int leap = 0;
+    
+    
+    if(year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)){
+        leap = 1;
+    }
+   
+    else if( day>31 || day<1 ||(day>28 && month == 2 && leap == 1)||(day == 29 && month == 2 && leap == 0)){
+        printf("wrong day %d\n",day);
+        return 0;
+     }
+    
+    
+        destination->day = day;
+        destination->month = month;
+        destination->year = year;
+
+
+    
+    
+    
+return 1;
+    
+
+}
+//print all customers that have the date
+void printbydate(){
+    int x = 1;
+    char searchDate[11];
+    date search;
+    while(x){
+    printf("\n");
+    clearScreen();
+    getchar();
+    printf("Please enter the date:(dd/mm/yyyy) ");
+    fgets(searchDate,sizeof(searchDate),stdin);
+    while(!validateSearchDate(searchDate,&search)){
+        
+        printf("Wrong date Please try again:");
+        fgets(searchDate,sizeof(searchDate),stdin);
+        
+        //printf("%s\n",searchDate);
+        
+    }
+    clearScreen();
+    printf("\n");
+    while (1)
+        {
+            char confirm;
+            printf("Date you entered= %d/%d/%d\n",search.day,search.month,search.year);
+        printf("is it correct (yes =y,n = no enter date agin , m = return to main , e = close code): (y/n/m/e)");
+            scanf(" %c",&confirm);
+            //getchar();
+            if(confirm == 'y'){
+             printf("GREAT!");
+             x= 0;
+             break;}
+                //x =1;
+                
+                else if (confirm !='y' && confirm!='n'&& confirm!='m'&& confirm!='e'){
+                    printf("Invalid choice\n");
+                    x =1;
+                continue;
+                    }
+                    else if(confirm == 'n'){
+            x = 1;
+            break;
+
+        }
+        else if(confirm == 'm'){
+            
+            return;
+        }
+        else if(confirm == 'e'){
+            exit(1);
+        }
+        
+} }
+    //printf("\n");
+    //clearScreen();
+    int flag  = 0;
+    FILE *fptr = fopen("Reservation.txt","r");
+    if(fptr == NULL){
+        printf("Could not open file\n");
+        return ;
+    }
+    int lines = countlines(fptr);
+    //printf("lines = %d",lines);
+    fclose(fptr);
+    reservation* reservations = malloc(lines * sizeof(reservation));
+    load(reservations);
+    fptr = fopen("Room.txt","r");
+    if(fptr == NULL){
+        printf("Could not open file\n");
+        getchar();
+        return ;
+        }
+    int roomlines = countlines(fptr);
+    Room *rooms = malloc(roomlines*(sizeof(Room)));
+    LoadRooms(fptr,rooms);
+    fclose(fptr);
+   
+    clearScreen();
+    printf("\n");
+    for(int i = 0; i < lines; i++){
+        if((search.day == reservations[i].checkIn.day)&&(search.month == reservations[i].checkIn.month)&&(search.year == reservations[i].checkIn.year)){
+        int room = findRoom(rooms,reservations[i].roomNum,roomlines);
+        strcpy(reservations[i].RoomCategory,rooms[room].roomCategory);
+        printReservation(&reservations[i]);
+        printf("\n\t***************************************************\t\n");
+        flag = 1;
+       
+        }
+   
+}
+      if(flag == 0){
+            printf("No reservations found for the given date\n");
+         }
+   //getchar(); 
+return;
+}
+//not good
+void start(){
+    //getchar();
+     
+    while(1){
+    char choose;
+    
+    printf("Please choose an option:\n");
+    printf("enter r for reservation and c for changing reservaton and d for searching by date and e to exit program: ");
+    scanf(" %c",&choose);
+    if(choose == 'r'){
+        getchar();
+        reservation* customer = malloc(sizeof(reservation));
+        reserve(customer);
+        free(customer); 
+    }
+    if(choose == 'c'){
+        changeReservation();
+    }
+     if(choose == 'd'){
+        printbydate();
+    }
+    if(choose == 'e'){
+    return ;}
+    if(choose != 'e' && choose != 'c'&&choose != 'r'){
+        printf("Invalid choice try again\n");
+    }
+}
 }

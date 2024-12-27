@@ -5,19 +5,20 @@ typedef struct{
     int month;
     int year;
 }date;
+
 typedef struct{
-    char ID[8];
+    char reservationID[8];
     int roomNum;
-    char customerName [100];
-    char phoneNum[12];
-    int numberNights;
-    char email[100];
+    char reserveStatus[15];
+    char custName[100];
+    char nightNum[5];
     date checkIn;
+    char email[100];
+    char mobileNum[13];
     char RoomCategory [10];
-    char status[13];
-    char nationalID[15];
-    
-}reservationInfo;
+    char nationalId[15];
+}reservation;
+
 typedef struct 
 {
     int number;
