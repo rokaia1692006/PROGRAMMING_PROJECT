@@ -8,15 +8,16 @@ typedef struct{
 
 typedef struct{
     char reservationID[8];
-    int roomNum;
+    char roomNum[5];
     char reserveStatus[15];
     char custName[100];
     char nightNum[5];
     date checkIn;
     char email[100];
     char mobileNum[13];
-    char RoomCategory [10];
     char nationalId[15];
+    char RoomCategory [10];
+
 }reservation;
 
 typedef struct 
